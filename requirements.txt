@@ -1,0 +1,25 @@
+# Tested with Python 3.12.
+#   pip install -r requirements.txt
+#   pip install --no-deps -r requirements-nodeps.txt     (timm, without its dependencies)
+#   pip install -e .
+torch==2.4.1
+torchvision==0.19.1
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.5.2
+pandas==2.2.3
+pyyaml==6.0.2
+matplotlib==3.9.2
+transformers==4.44.2
+huggingface-hub==0.24.0
+safetensors==0.4.5
+einops==0.8.0
+tqdm==4.66.5
+pillow==10.4.0
+pytest==8.3.3
+# UniTS (third_party/UniTS) imports these
+reformer-pytorch==1.4.4
+# range-aware anomaly metric (VUS-PR); the version used for the reported runs was not pinned
+vus
+# optional: downloads the MSL/SMAP telemetry archive
+kaggle>=1.6,<2

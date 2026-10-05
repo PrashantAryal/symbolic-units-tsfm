@@ -1,0 +1,49 @@
+research:
+  backbone_protocol: UniTS native R1 prompt-and-head tuning, multivariate H=96 forecasting on the matched seven-dataset suite
+  fusion_mode: gated
+  fast_mode: false
+experiment:
+  name: units_forecasting_h96_r1_full
+  phase: 2
+  regime: R1
+  seed: 0
+  variants: [baseline, fastshapelets, bossst]
+  cells:
+    - {task: forecasting, dataset: ETTh1}
+    - {task: forecasting, dataset: ETTh2}
+    - {task: forecasting, dataset: Weather}
+    - {task: forecasting, dataset: ETTm1}
+    - {task: forecasting, dataset: ETTm2}
+    - {task: forecasting, dataset: Electricity}
+    - {task: forecasting, dataset: ExchangeRate}
+model:
+  backbone: units
+  name: units_x128_pretrain
+  repo_dir: third_party/UniTS
+  checkpoint: REQUIRED_SET_BY_RUNNER
+  seq_len: 96
+data:
+  forecasting: {horizon: 96, train_stride: 1, eval_stride: 1}
+symbolic:
+  window: 24
+  word_len: 8
+  alphabet_size: 4
+  top_k: 10
+  step: 1
+  chunk: 256
+  fastshapelets: {n_projections: 10, mask_size: 2, n_candidates: 50}
+  bossst: {numerosity_reduction: true, min_support: 0.02}
+# UniTS's adapter is a zero-initialised residual symbolic path.
+fusion: {proj_dim: 32, gate_init_bias: 0.0}
+train:
+  epochs: 10
+  batch_size: 32
+  lr_head: 1.0e-4
+  lr_backbone: 1.0e-5
+  weight_decay: 1.0e-4
+  grad_clip: 5.0
+  ckpt_every_steps: 250
+  early_stop_patience: 3
+  select_on: val_loss
+  cache_backbone_features: false
+eval: {batch_size: 64, explain: false, explain_forecasting: false}

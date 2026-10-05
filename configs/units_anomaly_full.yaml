@@ -1,0 +1,58 @@
+research:
+  backbone_protocol: UniTS anomaly-detection benchmark on the matched eight-dataset suite
+  fusion_mode: gated
+  fast_mode: false
+  anomaly_threshold_protocol: oracle_test_best_f1
+  vus_max_buffer: 512
+experiment:
+  name: units_anomaly_full
+  phase: 2
+  regime: R2
+  seed: 0
+  variants: [baseline, fastshapelets, bossst]
+  cells:
+    - {task: anomaly, dataset: MSL}
+    - {task: anomaly, dataset: SMAP}
+    - task: anomaly
+      dataset: SMD
+      data:
+        smd_machines:
+          [machine-1-1, machine-1-2, machine-1-3, machine-1-4, machine-1-5, machine-1-6, machine-1-7, machine-1-8,
+           machine-2-1, machine-2-2, machine-2-3, machine-2-4, machine-2-5, machine-2-6, machine-2-7, machine-2-8, machine-2-9,
+           machine-3-1, machine-3-2, machine-3-3, machine-3-4, machine-3-5, machine-3-6, machine-3-7, machine-3-8, machine-3-9, machine-3-10, machine-3-11]
+    - {task: anomaly, dataset: 1sddb40}
+    - {task: anomaly, dataset: CIMIS44AirTemperature3}
+    - {task: anomaly, dataset: ECG2}
+    - {task: anomaly, dataset: PSM}
+    - {task: anomaly, dataset: PowerDemand1}
+model:
+  backbone: units
+  name: units_x128_pretrain
+  repo_dir: third_party/UniTS
+  checkpoint: REQUIRED_SET_BY_RUNNER
+  seq_len: 96
+data:
+  # Full raw timeline and all entities, with 96-point non-overlapping train windows.
+  anomaly: {val_fraction: 0.1, train_stride: 96}
+symbolic:
+  window: 24
+  word_len: 8
+  alphabet_size: 4
+  top_k: 10
+  step: 1
+  chunk: 256
+  fastshapelets: {n_projections: 10, mask_size: 2, n_candidates: 50}
+  bossst: {numerosity_reduction: true, min_support: 0.02}
+fusion: {proj_dim: 32, gate_init_bias: 0.0}
+train:
+  epochs: 10
+  batch_size: 32
+  lr_head: 1.0e-4
+  lr_backbone: 1.0e-5
+  weight_decay: 0.0
+  grad_clip: 1.0
+  ckpt_every_steps: 100
+  early_stop_patience: 3
+  select_on: val_loss
+  cache_backbone_features: false
+eval: {batch_size: 64, explain: true, top_n: 3, preview: 10, explain_batch_size: 32}

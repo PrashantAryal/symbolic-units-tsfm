@@ -1,0 +1,54 @@
+research:
+  backbone_protocol: "Frozen UniTS R1; sparse symbolic reliability head (selective classification)"
+  fusion_mode: symbolic_reliability
+  fast_mode: false
+experiment:
+  name: units_classification_r1_symbolic_reliability
+  phase: 10
+  regime: R1
+  seed: 0
+  variants: [fastshapelets, bossst]
+  cells:
+    - {task: classification, dataset: NATOPS}
+    - {task: classification, dataset: ArticularyWordRecognition}
+    - {task: classification, dataset: SelfRegulationSCP1}
+    - {task: classification, dataset: UWaveGestureLibraryX}
+    - {task: classification, dataset: ECG5000}
+    - {task: classification, dataset: OSULeaf}
+    - {task: classification, dataset: BasicMotions}
+    - {task: classification, dataset: Libras}
+model:
+  backbone: units
+  name: units_x128_pretrain
+  repo_dir: third_party/UniTS
+  checkpoint: REQUIRED_SET_BY_RUNNER
+  seq_len: 512
+data:
+  classification: {val_fraction: 0.1}
+symbolic:
+  window: 0.1
+  word_len: 8
+  alphabet_size: 4
+  top_k: 10
+  step: 1
+  chunk: 256
+  fastshapelets: {n_projections: 10, mask_size: 2, n_candidates: 50}
+  bossst: {numerosity_reduction: true, min_support: 0.02}
+reliability:
+  oof_folds: 5          # reliability targets = out-of-fold UniTS correctness on the training split
+  n_folds: 5            # inner CV for the L1 strength
+  n_permutations: 50    # permuted-target null for the symbolic head
+  rule_cards: 10
+  n_examples: 6
+train:
+  epochs: 30
+  batch_size: 64
+  lr_head: 1.0e-3
+  lr_backbone: 1.0e-5
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  ckpt_every_steps: 100
+  early_stop_patience: 5
+  select_on: val_accuracy
+  cache_backbone_features: false
+eval: {batch_size: 64}
